@@ -1,0 +1,2 @@
+perl ./throughput.pl Exercise\ 2/ex2.out.tr 2 0.1 > Exercise\ 2/ftpthroughput
+gnuplot Exercise\ 2/showftpthrough
