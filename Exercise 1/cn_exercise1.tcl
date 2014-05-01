@@ -146,8 +146,8 @@ array set cbr [constructCBR $user(n0) $server(n0) 1500]
 $ns at 0.1 "$ftp(app) start"
 $ns at 9.9 "$ftp(app) stop"
 
-$ns at 3.0 "$cbr(app) start"
-$ns at 6.0 "$cbr(app) stop"
+#$ns at 3.0 "$cbr(app) start"
+#$ns at 6.0 "$cbr(app) stop"
 
 $ns at 10.0 "finish"
 # Execute Simulator
