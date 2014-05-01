@@ -138,7 +138,7 @@ array set user [initUser $n3 10.0Mb 0.2ms DropTail]
 array set server [initUser $n4 100.0Mb 0.3ms DropTail]
 
 # applications
-array set ftp [constructFTP $user(n1) $server(n1) 80]
+array set ftp [constructFTP $server(n1) $user(n1)  80]
 array set cbr [constructCBR $user(n0) $server(n0) 1500]
 
 # Schedule events here
