@@ -7,8 +7,12 @@
 # --------------------------------------------------------- #
 #  Setup: Simulator                                         #
 # --------------------------------------------------------- #
+
 #Create simulator
 set ns [new Simulator]
+
+$ns color 0 Red
+$ns color 1 Blue
 
 #trace files: nam and tr
 set tf [open exercise1.out.tr w]
@@ -26,7 +30,7 @@ proc finish {} {
    close $nf
    
    #call nam visualizer
-   exec nam exampla.out.nam &
+   exec nam exercise1.out.nam &
    exit 0  
 }
 
@@ -41,9 +45,9 @@ set tailTypeModem DropTail
 #  Setup: Procedures                                        #
 # --------------------------------------------------------- #
 # Initialize a CBR connection with the specified parameters.
-proc initCBR{sourceNode  destinationNode 
-             sourceAgent destinationAgent
-             cbrApp packetSize} {
+proc initCBR {sourceNode destinationNode 
+              sourceAgent destinationAgent
+              cbrApp packetSize} {
    global ns fidCounter
              
    # setup udp
@@ -60,7 +64,7 @@ proc initCBR{sourceNode  destinationNode
    $cbrApp set random_ false
 }
 
-proc constructCBR{sourceNode destinationNode packetSize} {
+proc constructCBR {sourceNode destinationNode packetSize} {
    array set cbr {}
    set cbr(source) [new Agent/UDP]
    set cbr(sink) [new Agent/Null]
@@ -68,14 +72,14 @@ proc constructCBR{sourceNode destinationNode packetSize} {
    
    initCBR $sourceNode $destinationNode $cbr(source) $cbr(sink) $cbr(app) $packetSize
    
-   return $cbr
+   return [array get cbr]
 }
 
 # --------------------------------------------------------- #
 # Initialize a FTP connection with the specified parameters.
-proc initFTP{sourceNode destinationNode
-             sourceAgent destinationAgent
-             windowSize ftpApp} {
+proc initFTP {sourceNode destinationNode
+              sourceAgent destinationAgent
+              windowSize ftpApp} {
    global ns fidCounter
    
    # setup tcp
@@ -92,16 +96,15 @@ proc initFTP{sourceNode destinationNode
    $ftpApp attach-agent $sourceAgent 
 }
 
-proc constructFTP{soureNode destinationNode
-                  packetSize windowSize} {
+proc constructFTP {sourceNode destinationNode windowSize} {
    array set ftp {}
-   set ftp(source) [new Agent/TCP]
+   set ftp(sour) [new Agent/TCP]
    set ftp(sink) [new Agent/TCPSink]
    set ftp(app) [new Application/FTP]
    
-   initFTP $sourceNode $destinationNode $ftp(source) $ftp(sink) $packetSize $windowSize $ftp(app)
+   initFTP $sourceNode $destinationNode $ftp(sour) $ftp(sink) $windowSize $ftp(app)
    
-   return $ftp           
+   return [array get ftp]
 }
 
 proc initUser {modemNode bandwidth propDelay tailType} {
@@ -117,7 +120,7 @@ proc initUser {modemNode bandwidth propDelay tailType} {
    $ns duplex-link $userNodes(n1) $userNodes(n2) $bandwidth $propDelay $tailType
    $ns duplex-link $userNodes(n2) $modemNode $bandwidth $propDelay $tailType
    
-   return $userNodes
+   return [array get userNodes]
 }
 
 # --------------------------------------------------------- #
@@ -131,12 +134,12 @@ $ns simplex-link $n3 $n4 256Kb 0.2ms $tailTypeModem
 $ns simplex-link $n4 $n3 4.0Mb 0.2ms $tailTypeModem
 
 # other nodes
-set user [initUser $n3 10.0Mb 0.2ms DropTail]
-set server [initUser $n4 100.0Mb 0.3ms DropTail]
+array set user [initUser $n3 10.0Mb 0.2ms DropTail]
+array set server [initUser $n4 100.0Mb 0.3ms DropTail]
 
 # applications
-set tcp [constructFTP $user(n1) $server(n1) 80]
-set cbr [constructCBR $user(n0) $server(n0) 1500]
+array set ftp [constructFTP $user(n1) $server(n1) 80]
+array set cbr [constructCBR $user(n0) $server(n0) 1500]
 
 # Schedule events here
 # -----------------------------------------------------------
@@ -146,6 +149,7 @@ $ns at 9.9 "$ftp(app) stop"
 $ns at 3.0 "$cbr(app) start"
 $ns at 6.0 "$cbr(app) stop"
 
+$ns at 10.0 "finish"
 # Execute Simulator
 # -----------------------------------------------------------
 $ns run
