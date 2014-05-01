@@ -1,15 +1,15 @@
 #Create simulator
 set ns [new Simulator]
 
-$ns color 0 Blue
-$ns color 1 Red
+$ns color 0 Red
+$ns color 1 Blue
 
 #trace file
-set tf [open ex2.out.tr w]
+set tf [open ex2reno.out.tr w]
 $ns trace-all $tf
 
 #nam tracefile
-set nf [open ex2.out.nam w]
+set nf [open ex2reno.out.nam w]
 $ns namtrace-all $nf
 
 #log HTTP request file sizes
@@ -25,10 +25,10 @@ set rep 1
 set rng1 [new RNG]
 set rng2 [new RNG]
 
-for {set i 0} {$i < $rep} {incr i} {
-	$rng1 next-substream;
-	$rng2 next-substream;
-}
+# for {set i 0} {$i < $rep} {incr i} {
+# 	$rng1 next-substream;
+#	$rng2 next-substream;
+# }
 
 #start time generator
 set timegen [new RandomVariable/Exponential]
@@ -58,7 +58,7 @@ proc finish {} {
 	close $sizelog
 	close $wndlog
 	
-	exec nam ex2.out.nam &
+	exec nam ex2reno.out.nam &
 	exit 0
 }
 
@@ -126,6 +126,7 @@ proc makeBurst {starttime amount} {
 		# Initialise connection
 		set reqAgents($httpCounter) [new Agent/TCP]
 		$reqAgents($httpCounter) set fid_ $httpCounter
+		$reqAgents($httpCounter) set size_ $filesize
 		$ns attach-agent $webserver $reqAgents($httpCounter)
 		set reqSinks($httpCounter) [new Agent/TCPSink]
 		$ns attach-agent $webclient $reqSinks($httpCounter)
@@ -169,7 +170,7 @@ proc plotWindow {tcpSource fileHandle} {
 $ns at 0.1 "plotWindow $ftpagent $wndlog"
 
 # finish up
-$ns at 100.0 "finish"
+$ns at 30.0 "finish"
 
 # here be dragons
 $ns run

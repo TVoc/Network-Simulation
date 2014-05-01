@@ -92,7 +92,7 @@ $ns duplex-link $inetend $ftpserver 10Mb 10ms DropTail
 $ns duplex-link $inetend $webserver 10Mb 10ms DropTail
 
 # === Initialise continuous FTP connection ===
-set ftpagent [new Agent/TCPReno]
+set ftpagent [new Agent/TCP/Reno]
 $ns attach-agent $ftpserver $ftpagent
 $ftpagent set window_ 80
 $ftpagent set fid_ 0

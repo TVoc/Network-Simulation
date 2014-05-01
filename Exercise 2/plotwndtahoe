@@ -1,0 +1,4 @@
+set style line 1 lt 1 linecolor rgb "red"
+set style line 2 lt 1 linecolor rgb "black"
+plot "wndlog" using 2 w l ls 1 title "Congestion window size", "wndlog" using 3 w l ls 2 title "Slow start threshold"
+pause

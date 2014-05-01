@@ -1,1 +1,5 @@
-plot "Exercise 2/ftpthroughput" w lines
+set xtics 1
+set mxtics 5
+set xlabel "Time (s)"
+set ylabel "Throughput (bytes/s)"
+plot "ftpthroughput" w lines title "Throughput"
