@@ -13,10 +13,10 @@ set nf [open ex2reno.out.nam w]
 $ns namtrace-all $nf
 
 #log HTTP request file sizes
-set sizelog [open sizelog w]
+set sizelog [open sizelogreno w]
 
 #log congestion window and slow start threshold of main FTP connection
-set wndlog [open wndlog w]
+set wndlog [open wndlogreno w]
 
 # === Initialise random variables ===
 
