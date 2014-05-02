@@ -1,0 +1,51 @@
+\section{Exercise 1: Bandwidth restrictions on KotNet}
+	\begin{enumerate}
+		\item \textbf{First, leave out the connection of the uploader. Plot the throughput of the main \ac{FTP} connection and discuss the download behaviour of a KotNet/Telenet modem with bandwidth caps. How do bandwidth limitations affect the download connection?}
+		
+		The throughput of the \ac{TCP} destination node is plotted in figure \ref . The default \ac{TCP} Tahoe implementation was used. The granularity of the throughput was set at 0.1s. 
+		The \ac{TCP} connection is started at 1.0s. The throughput raises exponentially until the 4.0Mb cap of the network is reached. This can be attributed to the slow start feature of \ac{TCP}. At this point the throughput stays around 4.0 Mb until the connection is closed at 9.9s. 
+		The negative bumps in the throughput are the result of the congestion window resetting to one. In figure \ref the congestion window is plotted. The bumps in the throughput are at the same time as when the congestion window resets. These resets take place when time-outs occur, or the receiver indicates that it has reached its limit. 
+		
+		When the congestion window is small, the number of packages sent is small, but due to the exponential growth, the effect is fairly limited. 		
+
+		The small positve bumps above the 4.0 Mb are caused by rounding errors. These would be smaller with a smaller granularity. 
+		
+		\item \textbf{What happens if you now enable both upload and download activities? Plot and compare the throughput of both streams. Do you spot any problems? If so, explain.}
+		
+		The throughputs of the receiving \ac{TCP} node and the receiving \ac{CBR} node are plotted in figure \ref. The \ac{TCP} throughput starts out in the same manner as in fig. \ref, again the throughput is capped at 4.0Mbs, due to the modem link. At 3.0s the \ac{CBR} application starts, and immediately the throughput of the \ac{TCP} connection drops significantly. It is crippled until the \ac{CBR} connection is stopped at 6.8s. At this point the normal slow start pushes the throughput back to 4.0Mbs, until the \ac{TCP} connection is stopped at 9.9s. 
+		The decrease in the throughput of the \ac{TCP} connection is due to the upload channel getting congested by the \ac{CBR} application. The underlying \ac{UDP} connection does no congestion control, thus it floods the upload buffers of the modem. This causes packets to be dropped, which in turn causes the congestion window to reset often, thus leading to a far lower throughput. 
+		The \ac{CBR} does no congestion control, as mentioned earlier, thus it will just flood the modem, and fill it till the capped 256.0Kbs. 
+		
+		\item \textbf{Consider now that the model is able to guarantee a certain amount of upload bandwidth to every application, which performance do you expect for both applications (\ac{FTP} and \ac{CBR})?}
+		
+			The \ac{FTP} application will perform better if the guaranteed upload bandwidth is big enough to send the acknowledgements without dropping them. Then a similar download performance will be observed as in fig \ref. 
+			The smaller the guaranteed upload bandwidth, the more likely it is packages will be dropped, and performance will drop.
+			The \ac{CBR} might lose some of its performance, as a part of the total bandwidth will be allocated to the \ac{FTP} application. However since it is not a hard cap, only a guarantee, this would only cause performs drops when the \ac{FTP} application, or other processes, would be actively using their guaranteed bandwidth. 
+		
+		\item \textbf{What would be the result if bandwidth was even more restricted? For example, up to September 2010, KotNet limitations were 512Kbps for downstream traffic and 100Kbps for upstream traffic.}
+		
+		  	In figure \ref the results of the an even more restricted bandwidth are plotted. The graph has a similar curvature as fig. \ref. However the \ac{TCP} connection now has a throughput of zero at times. This is due to the higher number of congestion window resets.
+		  	Thus the results would be that performance of the \ac{FTP} application would be even more crippled with a more restricted bandwidth.
+		
+		\item \textbf{Configure the upload connection with a fixed \texttt{rate\_} of 30k. Explain the simulated result (no plot required). What would be your (extra) solution(s) to improve the download experience on shared LANs behind capped Internet connections? How could you practically realise this?}
+		
+		By setting the rate of the \ac{CBR} application to 30k, the upload speed of the \ac{CBR} application is restricted to only 32Kbs.  The \ac{CBR} application is thus no longer capable of congesting the upload channel of the modem. This in turn, will benefit the \ac{FTP} applications' performance, since its packages will no longer be lost. 
+		This effect can be observed in fig. \ref. The \ac{TCP} throughput is at the maximum 4.0Mbs, the \ac{CBR} connection is limited at only 32Kbs. 
+		
+		It would be possible to switch from \ac{TCP} Tahoe to \ac{TCP} Reno, which causes smaller drops than \ac{TCP} Tahoe. Another improvement could be to use delayed acknowledgements. 		
+		
+		\item \textbf{Suppose we have in the future a KotNet/Telenet cable subscription that has 10 times more capacity: i.e a connection that has a downstream capacity of 40Mbps with an upstream capacity of 2Mbps.}
+		
+			\begin{enumerate}
+			  	\item \textbf{What performance can you expect if there are 10 users behind this connection and all performing the same activities as in this exercise? Why? What performance can you expect if there are only 5 users using the network? Why?}
+			  	
+			  	The performance of the \ac{TCP} would be bad, due to all the additional \ac{CBR} applications. As mentioned earlier, \ac{CBR} application have no form of congestion control and will flood the buffers of the modem again. The increased buffer size will not be enough to hold all upload packages, and will in turn drop certain packages.  The acknowledgements of the \ac{TCP} connection will be dropped, and thus performance will drop. 
+			  	
+			  	If there were only five users, the buffers might not get filled completely, which would improve the performance of the \ac{TCP} connection. This would lead to less packages of the \ac{TCP} connection to be dropped, and thus increasing throughput. 
+			  	
+				\item \textbf{Does the performance differ if 10 users perform the same activities but at random times? Are there some users who suffer from the network activities caused by other users? Why?}
+				
+				The worst case scenario would be that all users would upload at the same time, thus flooding the upload buffers, and creating a congestion. If the users start at random times, the upload activities would be scattered over a greater interval, thus most likely decreasing the amount of congestion. This would have a positive effect on the performance. 
+				The \ac{FTP} downloaders would still be affected by the \ac{CBR} uploaders. Especially when multiple \ac{CBR} uploaders are uploading at the same time, performance would plummet. 
+			\end{enumerate}
+	\end{enumerate}
