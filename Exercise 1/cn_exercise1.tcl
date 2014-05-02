@@ -21,6 +21,9 @@ $ns trace-all $tf
 set nf [open exercise1.out.nam w]
 $ns namtrace-all $nf
 
+set lf [open exercise1.out.log w]
+puts $lf "time congestion_window slow_start_threshold"
+
 # Finish Procedure: flushes all simulator data to file.
 proc finish {} {
    #finalize trace files
@@ -32,6 +35,17 @@ proc finish {} {
    #call nam visualizer
    exec nam exercise1.out.nam &
    exit 0  
+}
+
+# Write log file. 
+proc writeLog {tcp} {
+   global ns lf
+   set time 0.2
+   set now [$ns now]
+   set cwnd [$tcp set cwnd_]
+   set sst[$tcp set ssthresh_]
+   put $lf "$now $cwnd $sst"
+   $ns at [expr $now + $time] "writeLog"
 }
 
 # --------------------------------------------------------- #
@@ -143,6 +157,8 @@ array set cbr [constructCBR $user(n0) $server(n0) 1500]
 
 # Schedule events here
 # -----------------------------------------------------------
+$ns at 0.0 "writeLog $tcp(sour)"
+
 $ns at 0.1 "$ftp(app) start"
 $ns at 9.9 "$ftp(app) stop"
 
